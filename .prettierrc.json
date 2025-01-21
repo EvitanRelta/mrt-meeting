@@ -1,12 +1,9 @@
-api-key:
-    - deepseek=sk-3e68872670474d2fa419ee9848845755
-editor: 'cmd /c code --wait'
-cache-prompts: true
-dark-mode: true
-
-test-cmd: 'npm run format'
-auto-test: true
-
-architect: true
-model: r1
-editor-model: deepseek
+{
+    "trailingComma": "es5",
+    "tabWidth": 4,
+    "semi": false,
+    "singleQuote": true,
+    "jsxSingleQuote": true,
+    "printWidth": 100,
+    "plugins": ["prettier-plugin-organize-imports"]
+}
