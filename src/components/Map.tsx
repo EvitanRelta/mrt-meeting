@@ -14,6 +14,18 @@ export const Map = () => {
         const svg = d3.select(svgRef.current)
         const width = 800
         const height = 600
+        const padding = 50
+
+        // Create scales with padding
+        const xScale = d3
+            .scaleLinear()
+            .domain([0, 100])
+            .range([padding, width - padding])
+
+        const yScale = d3
+            .scaleLinear()
+            .domain([0, 100])
+            .range([height - padding, padding])
 
         svg.attr('width', width).attr('height', height)
 
@@ -38,10 +50,10 @@ export const Map = () => {
             .append('line')
             .attr('stroke', '#cccccc')
             .attr('stroke-width', 1)
-            .attr('x1', (d) => d.source.x!)
-            .attr('y1', (d) => d.source.y!)
-            .attr('x2', (d) => d.target.x!)
-            .attr('y2', (d) => d.target.y!)
+            .attr('x1', (d) => xScale(d.source.x!))
+            .attr('y1', (d) => yScale(d.source.y!))
+            .attr('x2', (d) => xScale(d.target.x!))
+            .attr('y2', (d) => yScale(d.target.y!))
 
         // Create nodes
         const node = svg
@@ -50,12 +62,12 @@ export const Map = () => {
             .data(graph.nodes)
             .enter()
             .append('circle')
-            .attr('r', 5)
+            .attr('r', 8)
             .attr('fill', (d) => d.color)
             .attr('stroke', 'white')
-            .attr('stroke-width', 1)
-            .attr('cx', (d) => d.x!)
-            .attr('cy', (d) => d.y!)
+            .attr('stroke-width', 2)
+            .attr('cx', (d) => xScale(d.x!))
+            .attr('cy', (d) => yScale(d.y!))
 
         // Add labels
         const label = svg
@@ -65,12 +77,12 @@ export const Map = () => {
             .enter()
             .append('text')
             .text((d) => d.name)
-            .attr('font-size', 10)
+            .attr('font-size', 12)
             .attr('font-family', 'sans-serif')
-            .attr('dx', 10)
-            .attr('dy', 4)
-            .attr('x', (d) => d.x!)
-            .attr('y', (d) => d.y!)
+            .attr('dx', 12)
+            .attr('dy', 5)
+            .attr('x', (d) => xScale(d.x!))
+            .attr('y', (d) => yScale(d.y!))
     }, [graph])
 
     return <svg ref={svgRef} />
