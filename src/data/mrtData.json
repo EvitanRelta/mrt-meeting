@@ -1,0 +1,14 @@
+{
+  "NS1": {
+    "name": "Jurong East",
+    "connections": {
+      "EW24": { "time": 2 }
+    }
+  },
+  "EW24": {
+    "name": "Jurong East",
+    "connections": {
+      "NS1": { "time": 2 }
+    }
+  }
+}
