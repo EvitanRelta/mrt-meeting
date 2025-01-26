@@ -7,5 +7,3 @@ export const stationGraphAtom = atom<StationGraph>({
     nodes: [],
     links: [],
 })
-
-export const simulationReadyAtom = atom<boolean>(false)
