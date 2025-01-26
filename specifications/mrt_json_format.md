@@ -21,7 +21,7 @@ Station metadata, connecting stations, travel times between stations.
 
 ## `mapPositions.json`
 
-X, Y position of each stations on the displayed map. Used for visually positioning the nodes on the map.
+X, Y position of each stations on the displayed map. Used for visually positioning the nodes on the map. X and Y are integers ranging from 0 to 100.
 
 ```json
 {
