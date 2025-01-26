@@ -57,7 +57,7 @@ src/
 - Draw connection lines between stations
 - Color nodes by MRT-line affiliation based on the station code prefix (eg. `CC13` and `CE1` belongs circle line and should be colored yellow) (gray for interchanges which have multiple station codes)
 
-### Version 2: Static Map Foundation
+### Version 2: Fixing station node positions
 
 **Objective**: Fix location of MRT station nodes based on JSON data   
 **Deliverable**: Same as version 1 but station nodes are in fixed positions  
