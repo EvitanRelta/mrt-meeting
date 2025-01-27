@@ -15,6 +15,7 @@ export const Map = () => {
         const width = 800
         const height = 600
         const padding = 50
+        const fontSize = 10
 
         const svg = d3
             .select(svgRef.current)
@@ -107,16 +108,16 @@ export const Map = () => {
             .enter()
             .append('text')
             .text((d) => d.name)
-            .attr('font-size', 12)
+            .attr('font-size', fontSize)
             .attr('font-family', 'sans-serif')
             .attr('dx', 12)
-            .attr('dy', 5)
+            .attr('dy', fontSize / 2)
             .attr('x', (d) => xScale(d.x!))
             .attr('y', (d) => yScale(d.y!))
 
         const zoom = d3
             .zoom<SVGSVGElement, unknown>()
-            .scaleExtent([0.5, 8])
+            .scaleExtent([0.5, 12])
             .on('zoom', (event: D3ZoomEvent<SVGSVGElement, unknown>) => {
                 const { transform } = event
                 const k = transform.k
@@ -146,9 +147,9 @@ export const Map = () => {
 
                 // Adjust label sizes and offsets
                 label
-                    .attr('font-size', 12 / k)
+                    .attr('font-size', fontSize / k)
                     .attr('dx', 12 / k)
-                    .attr('dy', 5 / k)
+                    .attr('dy', fontSize / (2 * k))
 
                 // Toggle label visibility based on zoom level
                 if (k < 2) {
