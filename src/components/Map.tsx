@@ -76,18 +76,42 @@ export const Map = () => {
         }
 
         // Create nodes
-        const node = svg
+        const nodeGroup = svg
             .append('g')
-            .selectAll('circle')
+            .selectAll('g')
             .data(graph.nodes)
             .enter()
-            .append('circle')
-            .attr('r', 8)
-            .attr('fill', (d) => getStationColor(d.id))
-            .attr('stroke', 'white')
-            .attr('stroke-width', 2)
-            .attr('cx', (d) => xScale(d.x!))
-            .attr('cy', (d) => yScale(d.y!))
+            .append('g')
+            .attr('transform', (d) => `translate(${xScale(d.x!)},${yScale(d.y!)})`)
+
+        // Create arcs for interchange nodes
+        const arc = d3.arc<d3.PieArcDatum<string>>().innerRadius(0).outerRadius(8).padAngle(0.02)
+
+        nodeGroup.each(function (d) {
+            const node = d3.select(this)
+            if (d.isInterchange) {
+                const pie = d3.pie<string>().value(1).sort(null)
+                const arcs = pie(d.codes)
+
+                node.selectAll('path')
+                    .data(arcs)
+                    .enter()
+                    .append('path')
+                    .attr('d', (d) => arc(d))
+                    .attr('fill', (arcData) => {
+                        const prefix = arcData.data.match(/^[A-Z]+/)?.[0]
+                        return (prefix && lineColors[prefix]) || '#CCCCCC'
+                    })
+                    .attr('stroke', 'white')
+                    .attr('stroke-width', 2)
+            } else {
+                node.append('circle')
+                    .attr('r', 8)
+                    .attr('fill', getStationColor(d.id))
+                    .attr('stroke', 'white')
+                    .attr('stroke-width', 2)
+            }
+        })
 
         // Add labels
         const label = svg
