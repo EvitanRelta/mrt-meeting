@@ -16,17 +16,14 @@ export const Map = () => {
         const height = 600
         const padding = 50
 
-        // Set up SVG with viewBox for responsive scaling
         const svg = d3
             .select(svgRef.current)
             .attr('width', '100%')
             .attr('height', '100%')
             .attr('viewBox', `0 0 ${width} ${height}`)
 
-        // Create main group for zoomable content
         const g = svg.append('g')
 
-        // Create scales with original domain
         const xScale = d3
             .scaleLinear()
             .domain([0, 100])
@@ -37,19 +34,16 @@ export const Map = () => {
             .domain([0, 100])
             .range([height - padding, padding])
 
-        // Create node lookup object
         const nodeLookup: Record<string, StationNode> = {}
         graph.nodes.forEach((node) => {
             nodeLookup[node.id] = node
         })
 
-        // Create links with actual node references
         const links = graph.links.map((link) => ({
             source: nodeLookup[link.source],
             target: nodeLookup[link.target],
         }))
 
-        // Create links inside the zoomable group
         const link = g
             .append('g')
             .selectAll('line')
@@ -63,18 +57,16 @@ export const Map = () => {
             .attr('x2', (d) => xScale(d.target.x!))
             .attr('y2', (d) => yScale(d.target.y!))
 
-        // Line color mapping
         const lineColors: Record<string, string> = {
-            NS: '#D42E12', // Red
-            EW: '#009645', // Green
-            NE: '#9900AA', // Purple
-            CC: '#FAE100', // Yellow
-            DT: '#005EC4', // Blue
-            BP: '#0099AA', // Light Blue
-            TE: '#9D5B25', // Brown
+            NS: '#D42E12',
+            EW: '#009645',
+            NE: '#9900AA',
+            CC: '#FAE100',
+            DT: '#005EC4',
+            BP: '#0099AA',
+            TE: '#9D5B25',
         }
 
-        // Create nodes inside the zoomable group
         const nodeGroup = g
             .append('g')
             .selectAll('g')
@@ -82,9 +74,6 @@ export const Map = () => {
             .enter()
             .append('g')
             .attr('transform', (d) => `translate(${xScale(d.x!)},${yScale(d.y!)})`)
-
-        // Create arcs for interchange nodes
-        const arc = d3.arc<d3.PieArcDatum<string>>().innerRadius(0).outerRadius(8).padAngle(0.02)
 
         nodeGroup.each(function (d) {
             const node = d3.select(this)
@@ -96,7 +85,6 @@ export const Map = () => {
                     .data(arcs)
                     .enter()
                     .append('path')
-                    .attr('d', (d) => arc(d))
                     .attr('fill', (arcData) => {
                         const prefix = arcData.data.match(/^[A-Z]+/)?.[0]
                         return (prefix && lineColors[prefix]) || '#CCCCCC'
@@ -105,14 +93,13 @@ export const Map = () => {
                     .attr('stroke-width', 2)
             } else {
                 node.append('circle')
-                    .attr('r', 8)
                     .attr('fill', getStationColor(d.id))
                     .attr('stroke', 'white')
                     .attr('stroke-width', 2)
+                    .attr('r', 8)
             }
         })
 
-        // Add labels inside the zoomable group
         const label = g
             .append('g')
             .selectAll('text')
@@ -127,21 +114,47 @@ export const Map = () => {
             .attr('x', (d) => xScale(d.x!))
             .attr('y', (d) => yScale(d.y!))
 
-        // Configure zoom behavior
         const zoom = d3
             .zoom<SVGSVGElement, unknown>()
             .scaleExtent([0.5, 8])
             .on('zoom', (event: D3ZoomEvent<SVGSVGElement, unknown>) => {
-                g.attr('transform', event.transform)
+                const { transform } = event
+                const k = transform.k
+                g.attr('transform', transform.toString())
+
+                // Adjust link stroke widths
+                link.attr('stroke-width', 1 / k)
+
+                // Update node sizes and strokes
+                nodeGroup.each(function (d) {
+                    const node = d3.select(this)
+                    if (d.isInterchange) {
+                        const arc = d3
+                            .arc<d3.PieArcDatum<string>>()
+                            .innerRadius(0)
+                            .outerRadius(8 / k)
+                            .padAngle(0.02)
+                        node.selectAll('path')
+                            .attr('d', (arcData) => arc(arcData))
+                            .attr('stroke-width', 2 / k)
+                    } else {
+                        node.select('circle')
+                            .attr('r', 8 / k)
+                            .attr('stroke-width', 2 / k)
+                    }
+                })
+
+                // Adjust label sizes and offsets
+                label
+                    .attr('font-size', 12 / k)
+                    .attr('dx', 12 / k)
+                    .attr('dy', 5 / k)
             })
 
         svg.call(zoom).call(zoom.transform, d3.zoomIdentity)
 
-        // Helper function for station colors
         function getStationColor(stationCode: string): string {
-            if (stationCode.includes('/')) {
-                return '#CCCCCC'
-            }
+            if (stationCode.includes('/')) return '#CCCCCC'
             const prefix = stationCode.match(/^[A-Z]+/)?.[0]
             return (prefix && lineColors[prefix]) || '#CCCCCC'
         }
