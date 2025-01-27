@@ -135,7 +135,7 @@ export const Map = () => {
                             .outerRadius(8 / k)
                             .padAngle(0.02)
                         node.selectAll('path')
-                            .attr('d', (arcData) => arc(arcData))
+                            .attr('d', (d) => arc(d as d3.PieArcDatum<string>))
                             .attr('stroke-width', 2 / k)
                     } else {
                         node.select('circle')
