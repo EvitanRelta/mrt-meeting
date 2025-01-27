@@ -34,8 +34,8 @@ export const DataLoader = () => {
 
         // Process raw data into graph structure
         Object.entries(mrtData).forEach(([id, station]) => {
-            const codes = [id]
-            const isInterchange = Object.keys(station.connections).length > 1
+            const codes = id.split('/')
+            const isInterchange = codes.length > 1
             const position = mapPositions[id]
 
             nodes.push({
