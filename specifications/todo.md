@@ -1,3 +1,5 @@
+get x/y coords in 0-1000
+
 update react to react 19 for Suspense
 
 add map details into store in phase 1
