@@ -59,7 +59,7 @@ src/
 
 ### Version 2: Fixing station node positions
 
-**Objective**: Fix location of MRT station nodes based on JSON data   
+**Objective**: Fix location of MRT station nodes based on JSON data  
 **Deliverable**: Same as version 1 but station nodes are in fixed positions  
 **New data given**: `mapPositions.json` - X, Y position of each stations on the displayed map. Used for visually positioning the nodes on the map.  
 **Features**:
