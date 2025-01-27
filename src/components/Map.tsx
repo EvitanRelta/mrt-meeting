@@ -149,6 +149,13 @@ export const Map = () => {
                     .attr('font-size', 12 / k)
                     .attr('dx', 12 / k)
                     .attr('dy', 5 / k)
+
+                // Toggle label visibility based on zoom level
+                if (k < 2) {
+                    label.attr('visibility', 'hidden')
+                } else {
+                    label.attr('visibility', 'visible')
+                }
             })
 
         svg.call(zoom).call(zoom.transform, d3.zoomIdentity)
