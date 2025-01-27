@@ -1,8 +1,16 @@
 import { useAtom } from 'jotai'
 import { useEffect } from 'react'
+import mapPositionsData from '../data/mapPositions.json'
 import mrtData from '../data/mrtData.json'
 import type { StationLink, StationNode } from '../utils/data'
-import { rawStationDataAtom, simulationReadyAtom, stationGraphAtom } from './store'
+import { rawStationDataAtom, stationGraphAtom } from './store'
+
+interface Position {
+    x: number
+    y: number
+}
+
+const mapPositions: Record<string, Position> = mapPositionsData
 
 const getLineColor = (code: string): string => {
     const prefix = code.substring(0, 2)
@@ -19,7 +27,6 @@ const getLineColor = (code: string): string => {
 export const DataLoader = () => {
     const [, setRawData] = useAtom(rawStationDataAtom)
     const [, setGraph] = useAtom(stationGraphAtom)
-    const [, setSimulationReady] = useAtom(simulationReadyAtom)
 
     useEffect(() => {
         const nodes: StationNode[] = []
@@ -27,8 +34,9 @@ export const DataLoader = () => {
 
         // Process raw data into graph structure
         Object.entries(mrtData).forEach(([id, station]) => {
-            const codes = [id]
-            const isInterchange = Object.keys(station.connections).length > 1
+            const codes = id.split('/')
+            const isInterchange = codes.length > 1
+            const position = mapPositions[id]
 
             nodes.push({
                 id,
@@ -36,6 +44,8 @@ export const DataLoader = () => {
                 codes,
                 isInterchange,
                 color: isInterchange ? '#777777' : getLineColor(id),
+                x: position?.x,
+                y: position?.y,
             })
 
             Object.entries(station.connections).forEach(([targetId]) => {
@@ -48,8 +58,7 @@ export const DataLoader = () => {
 
         setRawData(mrtData)
         setGraph({ nodes, links })
-        setSimulationReady(true)
-    }, [setRawData, setGraph, setSimulationReady])
+    }, [setRawData, setGraph])
 
     return null
 }
