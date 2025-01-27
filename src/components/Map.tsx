@@ -132,14 +132,14 @@ export const Map = () => {
                         const arc = d3
                             .arc<d3.PieArcDatum<string>>()
                             .innerRadius(0)
-                            .outerRadius(8 / k)
+                            .outerRadius(Math.max(3 / k, Math.min(2 * k, 10 / k)))
                             .padAngle(0.02)
                         node.selectAll('path')
                             .attr('d', (d) => arc(d as d3.PieArcDatum<string>))
                             .attr('stroke-width', 2 / k)
                     } else {
                         node.select('circle')
-                            .attr('r', 8 / k)
+                            .attr('r', Math.max(3 / k, Math.min(2 * k, 10 / k)))
                             .attr('stroke-width', 2 / k)
                     }
                 })
