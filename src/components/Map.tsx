@@ -1,3 +1,4 @@
+import type { D3ZoomEvent } from 'd3'
 import * as d3 from 'd3'
 import { useAtom } from 'jotai'
 import { useEffect, useRef } from 'react'
@@ -11,12 +12,21 @@ export const Map = () => {
     useEffect(() => {
         if (!svgRef.current) return
 
-        const svg = d3.select(svgRef.current)
         const width = 800
         const height = 600
         const padding = 50
 
-        // Create scales with padding
+        // Set up SVG with viewBox for responsive scaling
+        const svg = d3
+            .select(svgRef.current)
+            .attr('width', '100%')
+            .attr('height', '100%')
+            .attr('viewBox', `0 0 ${width} ${height}`)
+
+        // Create main group for zoomable content
+        const g = svg.append('g')
+
+        // Create scales with original domain
         const xScale = d3
             .scaleLinear()
             .domain([0, 100])
@@ -26,8 +36,6 @@ export const Map = () => {
             .scaleLinear()
             .domain([0, 100])
             .range([height - padding, padding])
-
-        svg.attr('width', width).attr('height', height)
 
         // Create node lookup object
         const nodeLookup: Record<string, StationNode> = {}
@@ -41,8 +49,8 @@ export const Map = () => {
             target: nodeLookup[link.target],
         }))
 
-        // Create links
-        const link = svg
+        // Create links inside the zoomable group
+        const link = g
             .append('g')
             .selectAll('line')
             .data(links)
@@ -66,17 +74,8 @@ export const Map = () => {
             TE: '#9D5B25', // Brown
         }
 
-        // Function to get station color
-        const getStationColor = (stationCode: string) => {
-            if (stationCode.includes('/')) {
-                return '#CCCCCC' // Gray for combined stations
-            }
-            const prefix = stationCode.match(/^[A-Z]+/)?.[0]
-            return (prefix && lineColors[prefix]) || '#CCCCCC'
-        }
-
-        // Create nodes
-        const nodeGroup = svg
+        // Create nodes inside the zoomable group
+        const nodeGroup = g
             .append('g')
             .selectAll('g')
             .data(graph.nodes)
@@ -113,8 +112,8 @@ export const Map = () => {
             }
         })
 
-        // Add labels
-        const label = svg
+        // Add labels inside the zoomable group
+        const label = g
             .append('g')
             .selectAll('text')
             .data(graph.nodes)
@@ -127,6 +126,25 @@ export const Map = () => {
             .attr('dy', 5)
             .attr('x', (d) => xScale(d.x!))
             .attr('y', (d) => yScale(d.y!))
+
+        // Configure zoom behavior
+        const zoom = d3
+            .zoom<SVGSVGElement, unknown>()
+            .scaleExtent([0.5, 8])
+            .on('zoom', (event: D3ZoomEvent<SVGSVGElement, unknown>) => {
+                g.attr('transform', event.transform)
+            })
+
+        svg.call(zoom).call(zoom.transform, d3.zoomIdentity)
+
+        // Helper function for station colors
+        function getStationColor(stationCode: string): string {
+            if (stationCode.includes('/')) {
+                return '#CCCCCC'
+            }
+            const prefix = stationCode.match(/^[A-Z]+/)?.[0]
+            return (prefix && lineColors[prefix]) || '#CCCCCC'
+        }
     }, [graph])
 
     return <svg ref={svgRef} />
