@@ -32,7 +32,9 @@ export async function fetchMRTInfo(mrtcode_start, mrtcode_end) {
 export function parseHtmlAndGetTravelTime(htmlString) {
     const parser = new DOMParser()
     const doc = parser.parseFromString(htmlString, 'text/html')
-    const element = doc.querySelector('#Content-eservice > div > table:nth-child(3) > tbody > tr:nth-child(2) > td:nth-child(3)')
+    const element = doc.querySelector(
+        '#Content-eservice > div > table:nth-child(3) > tbody > tr:nth-child(2) > td:nth-child(3)'
+    )
     return parseInt(element.innerText.trim(), 10)
 }
 

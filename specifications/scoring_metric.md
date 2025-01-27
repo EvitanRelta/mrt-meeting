@@ -8,13 +8,13 @@
 Score = Σ (weight_i × travel_time_i^2)
 ```
 
--   `weight_i`: User-assigned priority weight for participant _i_ (higher = more prioritized).
--   `travel_time_i`: Shortest-path travel time from participant _i_'s start station to the candidate midpoint.
+- `weight_i`: User-assigned priority weight for participant _i_ (higher = more prioritized).
+- `travel_time_i`: Shortest-path travel time from participant _i_'s start station to the candidate midpoint.
 
 **Weighting Logic**:
 
--   Weights are floats provided by users.
--   Example: If Person A has `weight=3` and Person B has `weight=1`, Person A's travel time is penalized 3× more than Person B's.
+- Weights are floats provided by users.
+- Example: If Person A has `weight=3` and Person B has `weight=1`, Person A's travel time is penalized 3× more than Person B's.
 
 **Scoring Process**:
 
