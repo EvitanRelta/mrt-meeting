@@ -27,12 +27,12 @@ export const Map = () => {
 
         const xScale = d3
             .scaleLinear()
-            .domain([0, 100])
+            .domain([0, 1000])
             .range([padding, width - padding])
 
         const yScale = d3
             .scaleLinear()
-            .domain([0, 100])
+            .domain([0, 1000])
             .range([height - padding, padding])
 
         const nodeLookup: Record<string, StationNode> = {}
