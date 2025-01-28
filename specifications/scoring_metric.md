@@ -22,4 +22,5 @@ Score = Σ (weight_i × travel_time_i^2)
     - Calculate the shortest travel time for all participants using Dijkstra's algorithm on the MRT graph.
     - Compute the WSTT score using the formula above.
 2. Min-Max scale all scores to [0, 1].
-3. Candidate stations are then ranked by ascending WSTT score (lower = better).
+
+Lower WSTT score means the candidate station is more suitable as a midpoint station.
