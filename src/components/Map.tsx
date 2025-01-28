@@ -15,6 +15,7 @@ export const Map = () => {
         const width = 800
         const height = 600
         const padding = 50
+        const fontSize = 10
 
         const svg = d3
             .select(svgRef.current)
@@ -26,12 +27,12 @@ export const Map = () => {
 
         const xScale = d3
             .scaleLinear()
-            .domain([0, 100])
+            .domain([0, 1000])
             .range([padding, width - padding])
 
         const yScale = d3
             .scaleLinear()
-            .domain([0, 100])
+            .domain([0, 1000])
             .range([height - padding, padding])
 
         const nodeLookup: Record<string, StationNode> = {}
@@ -107,16 +108,16 @@ export const Map = () => {
             .enter()
             .append('text')
             .text((d) => d.name)
-            .attr('font-size', 12)
+            .attr('font-size', fontSize)
             .attr('font-family', 'sans-serif')
             .attr('dx', 12)
-            .attr('dy', 5)
+            .attr('dy', fontSize / 2)
             .attr('x', (d) => xScale(d.x!))
             .attr('y', (d) => yScale(d.y!))
 
         const zoom = d3
             .zoom<SVGSVGElement, unknown>()
-            .scaleExtent([0.5, 8])
+            .scaleExtent([0.5, 12])
             .on('zoom', (event: D3ZoomEvent<SVGSVGElement, unknown>) => {
                 const { transform } = event
                 const k = transform.k
@@ -132,23 +133,30 @@ export const Map = () => {
                         const arc = d3
                             .arc<d3.PieArcDatum<string>>()
                             .innerRadius(0)
-                            .outerRadius(8 / k)
+                            .outerRadius(Math.max(3 / k, Math.min(2 * k, 10 / k)))
                             .padAngle(0.02)
                         node.selectAll('path')
-                            .attr('d', (arcData) => arc(arcData))
+                            .attr('d', (d) => arc(d as d3.PieArcDatum<string>))
                             .attr('stroke-width', 2 / k)
                     } else {
                         node.select('circle')
-                            .attr('r', 8 / k)
+                            .attr('r', Math.max(3 / k, Math.min(2 * k, 10 / k)))
                             .attr('stroke-width', 2 / k)
                     }
                 })
 
                 // Adjust label sizes and offsets
                 label
-                    .attr('font-size', 12 / k)
+                    .attr('font-size', fontSize / k)
                     .attr('dx', 12 / k)
-                    .attr('dy', 5 / k)
+                    .attr('dy', fontSize / (2 * k))
+
+                // Toggle label visibility based on zoom level
+                if (k < 2) {
+                    label.attr('visibility', 'hidden')
+                } else {
+                    label.attr('visibility', 'visible')
+                }
             })
 
         svg.call(zoom).call(zoom.transform, d3.zoomIdentity)
