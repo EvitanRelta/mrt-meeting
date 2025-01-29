@@ -20,3 +20,18 @@ export { Map }
 const Map = () => { ... }
 export default Map
 ```
+
+## Prefer single-line if/else statements
+
+```js
+// Good
+if (next.has(d.id)) next.delete(d.id)
+else next.add(d.id)
+
+// Bad
+if (next.has(d.id)) {
+    next.delete(d.id)
+} else {
+    next.add(d.id)
+}
+```
