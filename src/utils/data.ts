@@ -1,4 +1,4 @@
-type StationNode = {
+export type StationNode = {
     id: string
     name: string
     codes: string[]
@@ -8,14 +8,12 @@ type StationNode = {
     y?: number
 }
 
-type StationLink = {
+export type StationLink = {
     source: string
     target: string
 }
 
-type StationGraph = {
+export type StationGraph = {
     nodes: StationNode[]
     links: StationLink[]
 }
-
-export type { StationGraph, StationLink, StationNode }

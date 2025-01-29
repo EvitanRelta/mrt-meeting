@@ -1,12 +1,10 @@
 import './App.css'
 import { Map } from './components/Map'
 
-function App() {
+export const App = () => {
     return (
         <div className='app'>
             <Map />
         </div>
     )
 }
-
-export default App
