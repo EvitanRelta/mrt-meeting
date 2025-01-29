@@ -1,12 +1,8 @@
 import { atom } from 'jotai'
 import mapPositionsData from '../data/mapPositions.json'
 import mrtData from '../data/mrtData.json'
+import type { MapPositions, MrtStationData } from '../data/types'
 import type { StationGraph } from '../utils/data'
-
-interface Position {
-    x: number
-    y: number
-}
 
 const getLineColor = (code: string): string => {
     const prefix = code.substring(0, 2)
@@ -20,11 +16,11 @@ const getLineColor = (code: string): string => {
     )
 }
 
-export const rawStationDataAtom = atom(mrtData)
+export const rawStationDataAtom = atom<MrtStationData>(mrtData)
 
 export const stationGraphAtom = atom<StationGraph>((get) => {
     const rawData = get(rawStationDataAtom)
-    const mapPositions: Record<string, Position> = mapPositionsData
+    const mapPositions: MapPositions = mapPositionsData
 
     const nodes = Object.entries(rawData).map(([id, station]) => ({
         id,
@@ -40,6 +36,7 @@ export const stationGraphAtom = atom<StationGraph>((get) => {
         Object.keys(station.connections).map((targetId) => ({
             source: id,
             target: targetId,
+            time: station.connections[targetId].time,
         }))
     )
 
