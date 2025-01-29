@@ -1,19 +1,14 @@
-export interface Position {
-    x: number
-    y: number
-}
-
-export type MapPositions = Record<string, Position>
-
-export interface StationConnection {
-    time: number
+export interface MapPositions {
+    [stationCode: string]: { x: number; y: number }
 }
 
 export interface MrtStationData {
-    [stationId: string]: {
+    [stationCode: string]: {
         name: string
         connections: {
-            [targetStationId: string]: StationConnection
+            [targetStationCode: string]: {
+                time: number
+            }
         }
     }
 }
