@@ -32,3 +32,8 @@ All the work completed so far in this repository.
 - Fixed minor typing errors and UI bugs.
 - Updated X, Y coordinates in `mapPositions.json` to range from `[0, 1000]` instead of `[0, 100]`.
 - Improved readability of graph nodes by scaling them based on zoom level and hiding node labels when zoomed out.
+
+### Version 2.4: Simplifying codebase
+
+- Simplify TS types for JSON data.
+- Remove `DataLoader` React component, and instead load data in the `src/components/store.ts` Jotai store file.
