@@ -12,16 +12,16 @@ export const Map = () => {
     useEffect(() => {
         if (!svgRef.current) return
 
+        const svg = d3.select(svgRef.current)
+        // Clear existing SVG content
+        svg.selectAll('*').remove()
+
         const width = 800
         const height = 600
         const padding = 50
         const fontSize = 10
 
-        const svg = d3
-            .select(svgRef.current)
-            .attr('width', '100%')
-            .attr('height', '100%')
-            .attr('viewBox', `0 0 ${width} ${height}`)
+        svg.attr('width', '100%').attr('height', '100%').attr('viewBox', `0 0 ${width} ${height}`)
 
         const g = svg.append('g')
 
