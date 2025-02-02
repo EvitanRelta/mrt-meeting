@@ -110,6 +110,13 @@ export const Map = () => {
                     })
                     .attr('stroke', 'white')
                     .attr('stroke-width', 2)
+
+                // Add click area for interchange stations
+                node.append('circle')
+                    .attr('class', 'click-area')
+                    .attr('fill', 'transparent')
+                    .attr('r', 16)
+                    .style('pointer-events', 'all')
             } else {
                 node.append('circle')
                     .attr('class', 'main-circle')
@@ -172,6 +179,12 @@ export const Map = () => {
                         node.selectAll('path')
                             .attr('d', (d) => arc(d as d3.PieArcDatum<string>))
                             .attr('stroke-width', 2 / k)
+
+                        // Scale click area for interchange stations
+                        node.select('.click-area').attr(
+                            'r',
+                            Math.max(3 / k, Math.min(2 * k, 10 / k)) * 2
+                        )
                     } else {
                         const radius = Math.max(3 / k, Math.min(2 * k, 10 / k))
                         node.select('.main-circle')
