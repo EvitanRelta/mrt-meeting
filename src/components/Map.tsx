@@ -174,7 +174,7 @@ export const Map = () => {
 
                         node.select('.selection-ring')
                             .attr('r', radius * 1.5)
-                            .attr('stroke-width', 4 / k)
+                            .attr('stroke-width', Math.max(2 / k, Math.min(1 * k, 4 / k)))
                             .attr('visibility', selectedStations.has(d.id) ? 'visible' : 'hidden')
                     }
                 })
