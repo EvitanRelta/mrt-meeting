@@ -3,10 +3,11 @@ import * as d3 from 'd3'
 import { useAtom } from 'jotai'
 import { useEffect, useRef } from 'react'
 import type { StationNode } from '../utils/data'
-import { stationGraphAtom } from './store'
+import { selectedStationsAtom, stationGraphAtom } from './store'
 
 export const Map = () => {
     const [graph] = useAtom(stationGraphAtom)
+    const [selectedStations, setSelectedStations] = useAtom(selectedStationsAtom)
     const svgRef = useRef<SVGSVGElement>(null)
 
     useEffect(() => {
@@ -75,9 +76,19 @@ export const Map = () => {
             .enter()
             .append('g')
             .attr('transform', (d) => `translate(${xScale(d.x!)},${yScale(d.y!)})`)
+            .style('cursor', 'pointer')
+            .on('click', (event: MouseEvent, d: StationNode) => {
+                event.stopPropagation() // Prevent map drag interaction
+                setSelectedStations((prev) => {
+                    const next = new Set(prev)
+                    next.has(d.id) ? next.delete(d.id) : next.add(d.id)
+                    return next
+                })
+            })
 
         nodeGroup.each(function (d) {
             const node = d3.select(this)
+            const isSelected = selectedStations.has(d.id)
             if (d.isInterchange) {
                 const pie = d3.pie<string>().value(1).sort(null)
                 const arcs = pie(d.codes)
@@ -98,6 +109,14 @@ export const Map = () => {
                     .attr('stroke', 'white')
                     .attr('stroke-width', 2)
                     .attr('r', 8)
+
+                if (isSelected) {
+                    node.append('circle')
+                        .attr('fill', 'none')
+                        .attr('stroke', getStationColor(d.id))
+                        .attr('stroke-width', 4)
+                        .attr('r', 12)
+                }
             }
         })
 
@@ -129,6 +148,7 @@ export const Map = () => {
                 // Update node sizes and strokes
                 nodeGroup.each(function (d) {
                     const node = d3.select(this)
+                    const isSelected = selectedStations.has(d.id)
                     if (d.isInterchange) {
                         const arc = d3
                             .arc<d3.PieArcDatum<string>>()
@@ -142,6 +162,13 @@ export const Map = () => {
                         node.select('circle')
                             .attr('r', Math.max(3 / k, Math.min(2 * k, 10 / k)))
                             .attr('stroke-width', 2 / k)
+
+                        // Colored outline ring when selected
+                        if (isSelected) {
+                            node.append('circle')
+                                .attr('r', Math.max(3 / k, Math.min(2 * k, 10 / k)))
+                                .attr('stroke-width', 2 / k)
+                        }
                     }
                 })
 
@@ -166,7 +193,7 @@ export const Map = () => {
             const prefix = stationCode.match(/^[A-Z]+/)?.[0]
             return (prefix && lineColors[prefix]) || '#CCCCCC'
         }
-    }, [graph])
+    }, [graph, selectedStations])
 
     return <svg ref={svgRef} />
 }
