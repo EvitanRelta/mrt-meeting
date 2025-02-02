@@ -37,3 +37,10 @@ All the work completed so far in this repository.
 
 - Simplify TS types for JSON data.
 - Remove `DataLoader` React component, and instead load data in the `src/components/store.ts` Jotai store file.
+
+## Version 3: Compute midpoint station candidates
+
+### Version 3.1: Station node selection
+
+- Add feature of selecting station nodes by clicking on the D3 nodes.
+- Add list of selected station nodes

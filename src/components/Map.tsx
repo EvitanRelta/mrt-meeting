@@ -3,11 +3,29 @@ import * as d3 from 'd3'
 import { useAtom } from 'jotai'
 import { useEffect, useRef } from 'react'
 import type { StationNode } from '../utils/data'
-import { stationGraphAtom } from './store'
+import { selectedStationsAtom, stationGraphAtom } from './store'
+
+const lineColors: Record<string, string> = {
+    NS: '#D42E12',
+    EW: '#009645',
+    NE: '#9900AA',
+    CC: '#FAE100',
+    DT: '#005EC4',
+    BP: '#0099AA',
+    TE: '#9D5B25',
+}
+
+const getStationColor = (stationCode: string) => {
+    if (stationCode.includes('/')) return '#CCCCCC'
+    const prefix = stationCode.match(/^[A-Z]+/)?.[0]
+    return (prefix && lineColors[prefix]) || '#CCCCCC'
+}
 
 export const Map = () => {
     const [graph] = useAtom(stationGraphAtom)
+    const [selectedStations, setSelectedStations] = useAtom(selectedStationsAtom)
     const svgRef = useRef<SVGSVGElement>(null)
+    const zoomTransformRef = useRef(d3.zoomIdentity)
 
     useEffect(() => {
         if (!svgRef.current) return
@@ -58,16 +76,6 @@ export const Map = () => {
             .attr('x2', (d) => xScale(d.target.x!))
             .attr('y2', (d) => yScale(d.target.y!))
 
-        const lineColors: Record<string, string> = {
-            NS: '#D42E12',
-            EW: '#009645',
-            NE: '#9900AA',
-            CC: '#FAE100',
-            DT: '#005EC4',
-            BP: '#0099AA',
-            TE: '#9D5B25',
-        }
-
         const nodeGroup = g
             .append('g')
             .selectAll('g')
@@ -75,9 +83,19 @@ export const Map = () => {
             .enter()
             .append('g')
             .attr('transform', (d) => `translate(${xScale(d.x!)},${yScale(d.y!)})`)
+            .style('cursor', 'pointer')
+            .on('click', (event: MouseEvent, d: StationNode) => {
+                event.stopPropagation() // Prevent map drag interaction
+                setSelectedStations((prev) => {
+                    const next = new Set(prev)
+                    next.has(d.id) ? next.delete(d.id) : next.add(d.id)
+                    return next
+                })
+            })
 
         nodeGroup.each(function (d) {
             const node = d3.select(this)
+            const isSelected = selectedStations.has(d.id)
             if (d.isInterchange) {
                 const pie = d3.pie<string>().value(1).sort(null)
                 const arcs = pie(d.codes)
@@ -92,12 +110,52 @@ export const Map = () => {
                     })
                     .attr('stroke', 'white')
                     .attr('stroke-width', 2)
+
+                // Add selection ring for interchange stations
+                const selectionArc = d3
+                    .arc<d3.PieArcDatum<string>>()
+                    .innerRadius(16)
+                    .outerRadius(20)
+                    .padAngle(0.02)
+
+                node.selectAll('.selection-ring')
+                    .data(arcs)
+                    .enter()
+                    .append('path')
+                    .attr('class', 'selection-ring')
+                    .attr('fill', (arcData) => {
+                        const prefix = arcData.data.match(/^[A-Z]+/)?.[0]
+                        return (prefix && lineColors[prefix]) || '#CCCCCC'
+                    })
+                    .attr('visibility', isSelected ? 'visible' : 'hidden')
+
+                // Add click area for interchange stations
+                node.append('circle')
+                    .attr('class', 'click-area')
+                    .attr('fill', 'transparent')
+                    .attr('r', 16)
+                    .style('pointer-events', 'all')
             } else {
                 node.append('circle')
+                    .attr('class', 'main-circle')
                     .attr('fill', getStationColor(d.id))
                     .attr('stroke', 'white')
                     .attr('stroke-width', 2)
                     .attr('r', 8)
+
+                node.append('circle')
+                    .attr('class', 'selection-ring')
+                    .attr('fill', 'none')
+                    .attr('stroke', getStationColor(d.id))
+                    .attr('stroke-width', 4)
+                    .attr('r', 12)
+                    .attr('visibility', isSelected ? 'visible' : 'hidden')
+
+                node.append('circle')
+                    .attr('class', 'click-area')
+                    .attr('fill', 'transparent') // Make it invisible
+                    .attr('r', 16) // Larger than the visible node
+                    .style('pointer-events', 'all') // Ensure it captures clicks
             }
         })
 
@@ -121,6 +179,7 @@ export const Map = () => {
             .on('zoom', (event: D3ZoomEvent<SVGSVGElement, unknown>) => {
                 const { transform } = event
                 const k = transform.k
+                zoomTransformRef.current = event.transform
                 g.attr('transform', transform.toString())
 
                 // Adjust link stroke widths
@@ -138,10 +197,35 @@ export const Map = () => {
                         node.selectAll('path')
                             .attr('d', (d) => arc(d as d3.PieArcDatum<string>))
                             .attr('stroke-width', 2 / k)
+
+                        // Update selection ring for interchange stations
+                        const selectionArc = d3
+                            .arc<d3.PieArcDatum<string>>()
+                            .innerRadius(Math.max(3 / k, Math.min(2 * k, 10 / k)) * 1.5)
+                            .outerRadius(Math.max(3 / k, Math.min(2 * k, 10 / k)) * 2)
+                            .padAngle(0.02)
+
+                        node.selectAll('.selection-ring')
+                            .attr('d', (d) => selectionArc(d as d3.PieArcDatum<string>))
+                            .attr('visibility', selectedStations.has(d.id) ? 'visible' : 'hidden')
+
+                        // Scale click area for interchange stations
+                        node.select('.click-area').attr(
+                            'r',
+                            Math.max(3 / k, Math.min(2 * k, 10 / k)) * 2
+                        )
                     } else {
-                        node.select('circle')
-                            .attr('r', Math.max(3 / k, Math.min(2 * k, 10 / k)))
+                        const radius = Math.max(3 / k, Math.min(2 * k, 10 / k))
+                        node.select('.main-circle')
+                            .attr('r', radius)
                             .attr('stroke-width', 2 / k)
+
+                        node.select('.selection-ring')
+                            .attr('r', radius * 1.5)
+                            .attr('stroke-width', Math.max(2 / k, Math.min(1 * k, 4 / k)))
+                            .attr('visibility', selectedStations.has(d.id) ? 'visible' : 'hidden')
+
+                        node.select('.click-area').attr('r', radius * 2) // Make click area twice the size of the visible node
                     }
                 })
 
@@ -159,14 +243,8 @@ export const Map = () => {
                 }
             })
 
-        svg.call(zoom).call(zoom.transform, d3.zoomIdentity)
-
-        function getStationColor(stationCode: string): string {
-            if (stationCode.includes('/')) return '#CCCCCC'
-            const prefix = stationCode.match(/^[A-Z]+/)?.[0]
-            return (prefix && lineColors[prefix]) || '#CCCCCC'
-        }
-    }, [graph])
+        svg.call(zoom).call(zoom.transform, zoomTransformRef.current || d3.zoomIdentity)
+    }, [graph, selectedStations])
 
     return <svg ref={svgRef} />
 }

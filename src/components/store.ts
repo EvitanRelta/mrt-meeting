@@ -1,4 +1,5 @@
 import { atom } from 'jotai'
+import { atomWithReset } from 'jotai/utils'
 import mapPositionsData from '../data/mapPositions.json'
 import mrtData from '../data/mrtData.json'
 import type { MapPositions, MrtStationData } from '../data/types'
@@ -17,6 +18,8 @@ const getLineColor = (code: string): string => {
 }
 
 export const rawStationDataAtom = atom<MrtStationData>(mrtData)
+
+export const selectedStationsAtom = atomWithReset<Set<string>>(new Set())
 
 export const stationGraphAtom = atom<StationGraph>((get) => {
     const rawData = get(rawStationDataAtom)

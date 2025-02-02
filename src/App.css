@@ -1,14 +1,65 @@
 .app {
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    display: grid;
+    grid-template-columns: 30% 70%;
     height: 100vh;
     width: 100vw;
     background-color: #f5f5f5;
+    color: black;
+}
+
+.station-list {
+    padding: 1rem;
+    overflow-y: auto;
+    border-right: 1px solid #ddd;
+    background-color: white;
+}
+
+.station-item {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem;
+    border-bottom: 1px solid #eee;
+}
+
+.station-code {
+    font-weight: bold;
+    margin-right: 0.5rem;
+}
+
+.station-name {
+    flex: 1;
+}
+
+.remove-button {
+    padding: 0.25rem 0.5rem;
+    border: none;
+    background: none;
+    cursor: pointer;
+    font-size: 1.2rem;
+    color: black;
+}
+
+.remove-button:hover {
+    color: #d2412d;
+}
+
+.empty-message {
+    color: #666;
+    text-align: center;
+    padding: 1rem;
 }
 
 svg {
     background-color: white;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    height: 100%;
+}
+
+@media (max-width: 768px) {
+    .app {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto 1fr;
+    }
 }
