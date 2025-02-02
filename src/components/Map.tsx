@@ -5,6 +5,22 @@ import { useEffect, useRef } from 'react'
 import type { StationNode } from '../utils/data'
 import { selectedStationsAtom, stationGraphAtom } from './store'
 
+const lineColors: Record<string, string> = {
+    NS: '#D42E12',
+    EW: '#009645',
+    NE: '#9900AA',
+    CC: '#FAE100',
+    DT: '#005EC4',
+    BP: '#0099AA',
+    TE: '#9D5B25',
+}
+
+const getStationColor = (stationCode: string) => {
+    if (stationCode.includes('/')) return '#CCCCCC'
+    const prefix = stationCode.match(/^[A-Z]+/)?.[0]
+    return (prefix && lineColors[prefix]) || '#CCCCCC'
+}
+
 export const Map = () => {
     const [graph] = useAtom(stationGraphAtom)
     const [selectedStations, setSelectedStations] = useAtom(selectedStationsAtom)
@@ -59,16 +75,6 @@ export const Map = () => {
             .attr('y1', (d) => yScale(d.source.y!))
             .attr('x2', (d) => xScale(d.target.x!))
             .attr('y2', (d) => yScale(d.target.y!))
-
-        const lineColors: Record<string, string> = {
-            NS: '#D42E12',
-            EW: '#009645',
-            NE: '#9900AA',
-            CC: '#FAE100',
-            DT: '#005EC4',
-            BP: '#0099AA',
-            TE: '#9D5B25',
-        }
 
         const nodeGroup = g
             .append('g')
@@ -151,7 +157,6 @@ export const Map = () => {
                 // Update node sizes and strokes
                 nodeGroup.each(function (d) {
                     const node = d3.select(this)
-                    const isSelected = selectedStations.has(d.id)
                     if (d.isInterchange) {
                         const arc = d3
                             .arc<d3.PieArcDatum<string>>()
@@ -189,12 +194,6 @@ export const Map = () => {
             })
 
         svg.call(zoom).call(zoom.transform, zoomTransformRef.current || d3.zoomIdentity)
-
-        function getStationColor(stationCode: string): string {
-            if (stationCode.includes('/')) return '#CCCCCC'
-            const prefix = stationCode.match(/^[A-Z]+/)?.[0]
-            return (prefix && lineColors[prefix]) || '#CCCCCC'
-        }
     }, [graph, selectedStations])
 
     return <svg ref={svgRef} />
