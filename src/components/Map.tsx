@@ -9,6 +9,7 @@ export const Map = () => {
     const [graph] = useAtom(stationGraphAtom)
     const [selectedStations, setSelectedStations] = useAtom(selectedStationsAtom)
     const svgRef = useRef<SVGSVGElement>(null)
+    const zoomTransformRef = useRef(d3.zoomIdentity)
 
     useEffect(() => {
         if (!svgRef.current) return
@@ -105,18 +106,19 @@ export const Map = () => {
                     .attr('stroke-width', 2)
             } else {
                 node.append('circle')
+                    .attr('class', 'main-circle')
                     .attr('fill', getStationColor(d.id))
                     .attr('stroke', 'white')
                     .attr('stroke-width', 2)
                     .attr('r', 8)
 
-                if (isSelected) {
-                    node.append('circle')
-                        .attr('fill', 'none')
-                        .attr('stroke', getStationColor(d.id))
-                        .attr('stroke-width', 4)
-                        .attr('r', 12)
-                }
+                node.append('circle')
+                    .attr('class', 'selection-ring')
+                    .attr('fill', 'none')
+                    .attr('stroke', getStationColor(d.id))
+                    .attr('stroke-width', 4)
+                    .attr('r', 12)
+                    .attr('visibility', isSelected ? 'visible' : 'hidden')
             }
         })
 
@@ -140,6 +142,7 @@ export const Map = () => {
             .on('zoom', (event: D3ZoomEvent<SVGSVGElement, unknown>) => {
                 const { transform } = event
                 const k = transform.k
+                zoomTransformRef.current = event.transform
                 g.attr('transform', transform.toString())
 
                 // Adjust link stroke widths
@@ -159,16 +162,15 @@ export const Map = () => {
                             .attr('d', (d) => arc(d as d3.PieArcDatum<string>))
                             .attr('stroke-width', 2 / k)
                     } else {
-                        node.select('circle')
-                            .attr('r', Math.max(3 / k, Math.min(2 * k, 10 / k)))
+                        const radius = Math.max(3 / k, Math.min(2 * k, 10 / k))
+                        node.select('.main-circle')
+                            .attr('r', radius)
                             .attr('stroke-width', 2 / k)
 
-                        // Colored outline ring when selected
-                        if (isSelected) {
-                            node.append('circle')
-                                .attr('r', Math.max(3 / k, Math.min(2 * k, 10 / k)))
-                                .attr('stroke-width', 2 / k)
-                        }
+                        node.select('.selection-ring')
+                            .attr('r', radius * 1.5)
+                            .attr('stroke-width', 4 / k)
+                            .attr('visibility', selectedStations.has(d.id) ? 'visible' : 'hidden')
                     }
                 })
 
@@ -186,7 +188,7 @@ export const Map = () => {
                 }
             })
 
-        svg.call(zoom).call(zoom.transform, d3.zoomIdentity)
+        svg.call(zoom).call(zoom.transform, zoomTransformRef.current || d3.zoomIdentity)
 
         function getStationColor(stationCode: string): string {
             if (stationCode.includes('/')) return '#CCCCCC'
