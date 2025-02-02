@@ -125,6 +125,12 @@ export const Map = () => {
                     .attr('stroke-width', 4)
                     .attr('r', 12)
                     .attr('visibility', isSelected ? 'visible' : 'hidden')
+
+                node.append('circle')
+                    .attr('class', 'click-area')
+                    .attr('fill', 'transparent') // Make it invisible
+                    .attr('r', 16) // Larger than the visible node
+                    .style('pointer-events', 'all') // Ensure it captures clicks
             }
         })
 
@@ -176,6 +182,8 @@ export const Map = () => {
                             .attr('r', radius * 1.5)
                             .attr('stroke-width', Math.max(2 / k, Math.min(1 * k, 4 / k)))
                             .attr('visibility', selectedStations.has(d.id) ? 'visible' : 'hidden')
+
+                        node.select('.click-area').attr('r', radius * 2) // Make click area twice the size of the visible node
                     }
                 })
 
