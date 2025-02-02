@@ -111,6 +111,24 @@ export const Map = () => {
                     .attr('stroke', 'white')
                     .attr('stroke-width', 2)
 
+                // Add selection ring for interchange stations
+                const selectionArc = d3
+                    .arc<d3.PieArcDatum<string>>()
+                    .innerRadius(16)
+                    .outerRadius(20)
+                    .padAngle(0.02)
+
+                node.selectAll('.selection-ring')
+                    .data(arcs)
+                    .enter()
+                    .append('path')
+                    .attr('class', 'selection-ring')
+                    .attr('fill', (arcData) => {
+                        const prefix = arcData.data.match(/^[A-Z]+/)?.[0]
+                        return (prefix && lineColors[prefix]) || '#CCCCCC'
+                    })
+                    .attr('visibility', isSelected ? 'visible' : 'hidden')
+
                 // Add click area for interchange stations
                 node.append('circle')
                     .attr('class', 'click-area')
@@ -179,6 +197,17 @@ export const Map = () => {
                         node.selectAll('path')
                             .attr('d', (d) => arc(d as d3.PieArcDatum<string>))
                             .attr('stroke-width', 2 / k)
+
+                        // Update selection ring for interchange stations
+                        const selectionArc = d3
+                            .arc<d3.PieArcDatum<string>>()
+                            .innerRadius(Math.max(3 / k, Math.min(2 * k, 10 / k)) * 1.5)
+                            .outerRadius(Math.max(3 / k, Math.min(2 * k, 10 / k)) * 2)
+                            .padAngle(0.02)
+
+                        node.selectAll('.selection-ring')
+                            .attr('d', (d) => selectionArc(d as d3.PieArcDatum<string>))
+                            .attr('visibility', selectedStations.has(d.id) ? 'visible' : 'hidden')
 
                         // Scale click area for interchange stations
                         node.select('.click-area').attr(
