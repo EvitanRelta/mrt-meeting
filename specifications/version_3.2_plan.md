@@ -1,4 +1,4 @@
-# Version 3.2 plan: implementing the station scoring feature.
+# Version 3.2 plan: implementing the proof-of-concept station scoring feature.
 
 Key objectives:
 
@@ -6,6 +6,7 @@ Key objectives:
 2. Calculate scores for just 1 station: Jurong East, based on currently selected stations
 3. Console log the score for Jurong East
 4. No UI change needed
+5. No changes to state management yet either
 
 Breakdown of tasks:
 
@@ -16,13 +17,3 @@ Breakdown of tasks:
     - Implement WSTT scoring formula
     - Implement min-max scaling of scores
     - Make the functions pure functions
-
-2. State Management Updates
-
-    - Add new `stationScoresAtom` to store calculated scores
-    - Create `scoreCalculationAtom` derived atom that:
-      * Watches `selectedStationsAtom`
-      * Calls scoring functions when selected stations change
-      * Returns scores mapped to station IDs
-    - Add `stationScoreEffectAtom` for console logging
-    - Add type definitions for scoring results
