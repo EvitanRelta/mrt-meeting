@@ -1,47 +1,62 @@
+import Graph from 'graphology'
 import { atom } from 'jotai'
 import { atomWithReset } from 'jotai/utils'
-import mapPositionsData from '../data/mapPositions.json'
-import mrtData from '../data/mrtData.json'
+import mapPositionsDataJSON from '../data/mapPositions.json'
+import mrtDataJSON from '../data/mrtData.json'
 import type { MapPositions, MrtStationData } from '../data/types'
-import type { StationGraph } from '../utils/data'
 
-const getLineColor = (code: string): string => {
-    const prefix = code.substring(0, 2)
-    return (
-        {
-            NS: '#d2412d',
-            EW: '#009944',
-            CG: '#f68b1e',
-            CE: '#fddb00',
-        }[prefix] || '#777777'
-    )
+const mapPositionsData = mapPositionsDataJSON as MapPositions
+const mrtData = mrtDataJSON as MrtStationData
+
+const getStationColor = (stationCode: string) => {
+    if (stationCode.includes('/')) return '#CCCCCC'
+    const prefix = stationCode.match(/^[A-Z]+/)?.[0]
+    const lineColors: Record<string, string> = {
+        NS: '#D42E12',
+        EW: '#009645',
+        NE: '#9900AA',
+        CC: '#FAE100',
+        DT: '#005EC4',
+        BP: '#0099AA',
+        TE: '#9D5B25',
+    }
+    return (prefix && lineColors[prefix]) || '#CCCCCC'
 }
 
 export const rawStationDataAtom = atom<MrtStationData>(mrtData)
 
 export const selectedStationsAtom = atomWithReset<Set<string>>(new Set())
 
-export const stationGraphAtom = atom<StationGraph>((get) => {
+export const stationGraphAtom = atom<Graph>((get) => {
     const rawData = get(rawStationDataAtom)
-    const mapPositions: MapPositions = mapPositionsData
+    const graph = new Graph()
 
-    const nodes = Object.entries(rawData).map(([id, station]) => ({
-        id,
-        name: station.name,
-        codes: id.split('/'),
-        isInterchange: id.includes('/'),
-        color: id.includes('/') ? '#777777' : getLineColor(id),
-        x: mapPositions[id]?.x,
-        y: mapPositions[id]?.y,
-    }))
+    // Add nodes
+    Object.entries(rawData).forEach(([id, station]) => {
+        const position = mapPositionsData[id]
+        graph.addNode(id, {
+            label: station.name,
+            x: position.x,
+            y: position.y,
+            size: id.includes('/') ? 15 : 10,
+            color: getStationColor(id),
+            isInterchange: id.includes('/'),
+            codes: id.split('/'),
+            hidden: false,
+        })
+    })
 
-    const links = Object.entries(rawData).flatMap(([id, station]) =>
-        Object.keys(station.connections).map((targetId) => ({
-            source: id,
-            target: targetId,
-            time: station.connections[targetId].time,
-        }))
-    )
+    // Add edges
+    Object.entries(rawData).forEach(([sourceId, station]) => {
+        Object.keys(station.connections).forEach((targetId) => {
+            if (!graph.hasEdge(sourceId, targetId)) {
+                graph.addEdge(sourceId, targetId, {
+                    size: 2,
+                    color: '#cccccc',
+                })
+            }
+        })
+    })
 
-    return { nodes, links }
+    return graph
 })
