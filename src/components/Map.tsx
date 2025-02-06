@@ -48,7 +48,7 @@ export const Map = () => {
                 sigmaRef.current = null
             }
         }
-    }, [graph])
+    }, [graph, selectedStations])
 
     // Update node rendering when selection changes
     useEffect(() => {
