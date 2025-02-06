@@ -23,20 +23,13 @@ export const Map = () => {
             labelWeight: '400',
             defaultNodeColor: '#999',
             defaultEdgeColor: '#cccccc',
-            nodeReducer: (node, data) => {
-                const isSelected = selectedStations.has(node)
-                return {
-                    ...data,
-                    highlighted: isSelected,
-                }
-            },
         })
 
         // Add click handler
-        sigmaRef.current.on('clickNode', ({ node }) => {
+        sigmaRef.current.on('clickNode', (event: { node: string }) => {
             setSelectedStations((prev) => {
                 const next = new Set(prev)
-                next.has(node) ? next.delete(node) : next.add(node)
+                next.has(event.node) ? next.delete(event.node) : next.add(event.node)
                 return next
             })
         })
@@ -48,14 +41,20 @@ export const Map = () => {
                 sigmaRef.current = null
             }
         }
-    }, [graph, selectedStations])
+    }, [graph])
 
     // Update node rendering when selection changes
     useEffect(() => {
-        if (sigmaRef.current) {
-            sigmaRef.current.refresh()
-        }
-    }, [selectedStations])
+        if (!sigmaRef.current) return
+
+        // Update all nodes' highlighted state
+        graph.forEachNode((nodeId: string) => {
+            graph.updateNodeAttributes(nodeId, (attr) => ({
+                ...attr,
+                highlighted: selectedStations.has(nodeId),
+            }))
+        })
+    }, [selectedStations, graph])
 
     return <div ref={containerRef} style={{ width: '100%', height: '600px' }} />
 }
