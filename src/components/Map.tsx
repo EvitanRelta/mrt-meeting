@@ -63,6 +63,7 @@ export const Map = () => {
                     )
                 }
             })
+            console.log('entering')
 
             setHoverState({
                 hoveredNode: event.node,
@@ -71,12 +72,12 @@ export const Map = () => {
         })
 
         sigmaRef.current.on('leaveNode', () => {
+            console.log('leaving')
             setHoverState({})
         })
 
         sigmaRef.current.setSetting('nodeReducer', (node: string, data: any) => {
             const res = { ...data }
-
             if (
                 hoverState.hoveredLineStations &&
                 !hoverState.hoveredLineStations.has(node) &&
@@ -90,7 +91,6 @@ export const Map = () => {
 
         sigmaRef.current.setSetting('edgeReducer', (edge: string, data: any) => {
             const res = { ...data }
-
             if (hoverState.hoveredLineStations) {
                 const [source, target] = graph.extremities(edge)
                 if (
