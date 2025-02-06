@@ -18,6 +18,7 @@ export const Map = () => {
     const [rawData] = useAtom(rawStationDataAtom)
     const containerRef = useRef<HTMLDivElement>(null)
     const sigmaRef = useRef<Sigma | null>(null)
+    const hoverTimeoutRef = useRef<number | null>(null)
 
     type HoverState = {
         hoveredNode?: string
@@ -50,26 +51,39 @@ export const Map = () => {
         })
 
         sigmaRef.current.on('enterNode', (event: { node: string }) => {
-            const stationCodes = event.node.split('/')
-            const lineStations = new Set<string>()
+            if (hoverTimeoutRef.current !== null) window.clearTimeout(hoverTimeoutRef.current)
 
-            stationCodes.forEach((code) => {
-                const linePrefix = code.match(/^[A-Z]+/)?.[0]
-                if (linePrefix)
-                    getStationsInLine(linePrefix, rawData).forEach((station) =>
-                        lineStations.add(station)
-                    )
-            })
+            // Highlight same-line stations only after 0.5s delay
+            hoverTimeoutRef.current = window.setTimeout(() => {
+                const stationCodes = event.node.split('/')
+                const lineStations = new Set<string>()
 
-            setHoverState({
-                hoveredNode: event.node,
-                hoveredLineStations: lineStations,
-            })
+                stationCodes.forEach((code) => {
+                    const linePrefix = code.match(/^[A-Z]+/)?.[0]
+                    if (linePrefix)
+                        getStationsInLine(linePrefix, rawData).forEach((station) =>
+                            lineStations.add(station)
+                        )
+                })
+
+                setHoverState({
+                    hoveredNode: event.node,
+                    hoveredLineStations: lineStations,
+                })
+            }, 500)
         })
 
-        sigmaRef.current.on('leaveNode', () => setHoverState({}))
+        sigmaRef.current.on('leaveNode', () => {
+            if (hoverTimeoutRef.current !== null) {
+                window.clearTimeout(hoverTimeoutRef.current)
+                hoverTimeoutRef.current = null
+            }
+            setHoverState({})
+        })
 
         return () => {
+            if (hoverTimeoutRef.current !== null) window.clearTimeout(hoverTimeoutRef.current)
+
             if (sigmaRef.current) {
                 sigmaRef.current.kill()
                 sigmaRef.current = null
