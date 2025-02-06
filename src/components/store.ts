@@ -8,19 +8,20 @@ import type { MapPositions, MrtStationData } from '../data/types'
 const mapPositionsData = mapPositionsDataJSON as MapPositions
 const mrtData = mrtDataJSON as MrtStationData
 
-const getStationColor = (stationCode: string) => {
-    if (stationCode.includes('/')) return '#CCCCCC'
-    const prefix = stationCode.match(/^[A-Z]+/)?.[0]
-    const lineColors: Record<string, string> = {
-        NS: '#D42E12',
-        EW: '#009645',
-        NE: '#9900AA',
-        CC: '#FAE100',
-        DT: '#005EC4',
-        BP: '#0099AA',
-        TE: '#9D5B25',
-    }
-    return (prefix && lineColors[prefix]) || '#CCCCCC'
+const getStationColor = (stationCode: string): string[] => {
+    return stationCode.split('/').map((code) => {
+        const prefix = code.match(/^[A-Z]+/)?.[0]
+        const lineColors: Record<string, string> = {
+            NS: '#D42E12',
+            EW: '#009645',
+            NE: '#9900AA',
+            CC: '#FAE100',
+            DT: '#005EC4',
+            BP: '#0099AA',
+            TE: '#9D5B25',
+        }
+        return (prefix && lineColors[prefix]) || '#CCCCCC'
+    })
 }
 
 export const rawStationDataAtom = atom<MrtStationData>(mrtData)
@@ -39,7 +40,7 @@ export const stationGraphAtom = atom<Graph>((get) => {
             x: position.x * 1.5,
             y: position.y,
             size: 10,
-            color: getStationColor(id),
+            colors: getStationColor(id),
             isInterchange: id.includes('/'),
             codes: id.split('/'),
             hidden: false,

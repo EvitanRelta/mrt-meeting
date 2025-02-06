@@ -1,6 +1,8 @@
+import { CreateNodePiechartProgramOptions, createNodePiechartProgram } from '@sigma/node-piechart'
 import { useAtom } from 'jotai'
 import { useEffect, useRef, useState } from 'react'
 import Sigma from 'sigma'
+import { DEFAULT_NODE_PROGRAM_CLASSES } from 'sigma/settings'
 import type { MrtStationData } from '../data/types'
 import { rawStationDataAtom, selectedStationsAtom, stationGraphAtom } from './store'
 
@@ -30,6 +32,18 @@ export const Map = () => {
     useEffect(() => {
         if (!containerRef.current) return
 
+        const nodeProgramClasses = { ...DEFAULT_NODE_PROGRAM_CLASSES }
+
+        for (let i = 2; i <= 4; i++) {
+            const slices: CreateNodePiechartProgramOptions['slices'] = [
+                { color: { attribute: 'color' }, value: { value: 1 } },
+            ]
+            for (let j = 1; j < i; j++) {
+                slices.push({ color: { attribute: `color-${j}` }, value: { value: 1 } })
+            }
+            nodeProgramClasses[`pie-${i}`] = createNodePiechartProgram({ slices })
+        }
+
         sigmaRef.current = new Sigma(graph, containerRef.current, {
             minCameraRatio: 0.1,
             maxCameraRatio: 2,
@@ -40,6 +54,37 @@ export const Map = () => {
             labelWeight: '400',
             defaultNodeColor: '#999',
             defaultEdgeColor: '#cccccc',
+            nodeProgramClasses,
+            nodeReducer: (node, data) => {
+                const colors = data.colors as string[]
+                const res = { ...data }
+
+                if (colors.length <= 1) {
+                    res.type = 'circle'
+                    res.color = colors[0]
+                } else {
+                    res.type = `pie-${colors.length}`
+                    res.color = colors[0]
+                    for (let i = 1; i < colors.length; i++) {
+                        res[`color-${i}`] = colors[i]
+                    }
+                }
+
+                if (
+                    hoverState.hoveredLineStations &&
+                    !hoverState.hoveredLineStations.has(node) &&
+                    hoverState.hoveredNode !== node
+                ) {
+                    res.color = '#f6f6f6'
+                    if (colors.length > 1) {
+                        for (let i = 1; i < colors.length; i++) {
+                            res[`color-${i}`] = '#f6f6f6'
+                        }
+                    }
+                }
+
+                return res
+            },
         })
 
         sigmaRef.current.on('clickNode', (event: { node: string }) => {
@@ -106,13 +151,31 @@ export const Map = () => {
         if (!sigmaRef.current) return
 
         sigmaRef.current.setSetting('nodeReducer', (node: string, data: any) => {
+            const colors = data.colors as string[]
             const res = { ...data }
+
+            if (colors.length <= 1) {
+                res.type = 'circle'
+                res.color = colors[0]
+            } else {
+                res.type = `pie-${colors.length}`
+                res.color = colors[0]
+                for (let i = 1; i < colors.length; i++) {
+                    res[`color-${i}`] = colors[i]
+                }
+            }
+
             if (
                 hoverState.hoveredLineStations &&
                 !hoverState.hoveredLineStations.has(node) &&
                 hoverState.hoveredNode !== node
             ) {
                 res.color = '#f6f6f6'
+                if (colors.length > 1) {
+                    for (let i = 1; i < colors.length; i++) {
+                        res[`color-${i}`] = '#f6f6f6'
+                    }
+                }
             }
             return res
         })
