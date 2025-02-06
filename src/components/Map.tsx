@@ -14,8 +14,8 @@ export const Map = () => {
 
         // Initialize Sigma
         sigmaRef.current = new Sigma(graph, containerRef.current, {
-            minCameraRatio: 0.5,
-            maxCameraRatio: 12,
+            minCameraRatio: 0.1,
+            maxCameraRatio: 2,
             labelRenderedSizeThreshold: 2,
             renderLabels: true,
             labelSize: 12,
