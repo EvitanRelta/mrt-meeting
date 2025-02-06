@@ -76,34 +76,6 @@ export const Map = () => {
             setHoverState({})
         })
 
-        sigmaRef.current.setSetting('nodeReducer', (node: string, data: any) => {
-            const res = { ...data }
-            if (
-                hoverState.hoveredLineStations &&
-                !hoverState.hoveredLineStations.has(node) &&
-                hoverState.hoveredNode !== node
-            ) {
-                res.color = '#f6f6f6'
-            }
-
-            return res
-        })
-
-        sigmaRef.current.setSetting('edgeReducer', (edge: string, data: any) => {
-            const res = { ...data }
-            if (hoverState.hoveredLineStations) {
-                const [source, target] = graph.extremities(edge)
-                if (
-                    !hoverState.hoveredLineStations.has(source) ||
-                    !hoverState.hoveredLineStations.has(target)
-                ) {
-                    res.color = '#f6f6f6'
-                }
-            }
-
-            return res
-        })
-
         // Cleanup
         return () => {
             if (sigmaRef.current) {
@@ -127,8 +99,36 @@ export const Map = () => {
     }, [selectedStations, graph])
 
     useEffect(() => {
-        sigmaRef.current?.refresh({ skipIndexation: true })
-    }, [hoverState])
+        if (!sigmaRef.current) return
+
+        sigmaRef.current.setSetting('nodeReducer', (node: string, data: any) => {
+            const res = { ...data }
+            if (
+                hoverState.hoveredLineStations &&
+                !hoverState.hoveredLineStations.has(node) &&
+                hoverState.hoveredNode !== node
+            ) {
+                res.color = '#f6f6f6'
+            }
+            return res
+        })
+
+        sigmaRef.current.setSetting('edgeReducer', (edge: string, data: any) => {
+            const res = { ...data }
+            if (hoverState.hoveredLineStations) {
+                const [source, target] = graph.extremities(edge)
+                if (
+                    !hoverState.hoveredLineStations.has(source) ||
+                    !hoverState.hoveredLineStations.has(target)
+                ) {
+                    res.color = '#f6f6f6'
+                }
+            }
+            return res
+        })
+
+        sigmaRef.current.refresh()
+    }, [hoverState, graph])
 
     return <div ref={containerRef} style={{ width: '100%', height: '600px' }} />
 }
