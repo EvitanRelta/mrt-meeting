@@ -23,18 +23,22 @@ const Map = () => { ... }
 export default Map
 ```
 
-## Prefer single-line if/else statements
+## Prefer single-line statements
 
 ```js
 // Good
 if (next.has(d.id)) next.delete(d.id)
 else next.add(d.id)
+for (let j = 1; j < 10; j++) console.log(j)
 
 // Bad
 if (next.has(d.id)) {
     next.delete(d.id)
 } else {
     next.add(d.id)
+}
+for (let j = 1; j < 10; j++) {
+    console.log(j)
 }
 ```
 
