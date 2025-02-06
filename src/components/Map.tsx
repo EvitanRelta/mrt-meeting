@@ -29,7 +29,6 @@ export const Map = () => {
     useEffect(() => {
         if (!containerRef.current) return
 
-        // Initialize Sigma
         sigmaRef.current = new Sigma(graph, containerRef.current, {
             minCameraRatio: 0.1,
             maxCameraRatio: 2,
@@ -42,7 +41,6 @@ export const Map = () => {
             defaultEdgeColor: '#cccccc',
         })
 
-        // Add click handler
         sigmaRef.current.on('clickNode', (event: { node: string }) => {
             setSelectedStations((prev) => {
                 const next = new Set(prev)
@@ -57,13 +55,11 @@ export const Map = () => {
 
             stationCodes.forEach((code) => {
                 const linePrefix = code.match(/^[A-Z]+/)?.[0]
-                if (linePrefix) {
+                if (linePrefix)
                     getStationsInLine(linePrefix, rawData).forEach((station) =>
                         lineStations.add(station)
                     )
-                }
             })
-            console.log('entering')
 
             setHoverState({
                 hoveredNode: event.node,
@@ -71,12 +67,8 @@ export const Map = () => {
             })
         })
 
-        sigmaRef.current.on('leaveNode', () => {
-            console.log('leaving')
-            setHoverState({})
-        })
+        sigmaRef.current.on('leaveNode', () => setHoverState({}))
 
-        // Cleanup
         return () => {
             if (sigmaRef.current) {
                 sigmaRef.current.kill()
@@ -85,11 +77,9 @@ export const Map = () => {
         }
     }, [graph])
 
-    // Update node rendering when selection changes
+    // Update node rendering when the selected stations changes
     useEffect(() => {
         if (!sigmaRef.current) return
-
-        // Update all nodes' highlighted state
         graph.forEachNode((nodeId: string) => {
             graph.updateNodeAttributes(nodeId, (attr) => ({
                 ...attr,
