@@ -36,7 +36,7 @@ export const stationGraphAtom = atom<Graph>((get) => {
         const position = mapPositionsData[id]
         graph.addNode(id, {
             label: station.name,
-            x: position.x,
+            x: position.x * 1.5,
             y: position.y,
             size: id.includes('/') ? 15 : 10,
             color: getStationColor(id),
