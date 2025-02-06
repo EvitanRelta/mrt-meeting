@@ -38,7 +38,7 @@ export const stationGraphAtom = atom<Graph>((get) => {
             label: station.name,
             x: position.x * 1.5,
             y: position.y,
-            size: id.includes('/') ? 15 : 10,
+            size: 10,
             color: getStationColor(id),
             isInterchange: id.includes('/'),
             codes: id.split('/'),
