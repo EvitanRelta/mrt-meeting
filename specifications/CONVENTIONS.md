@@ -2,6 +2,18 @@
 
 Ensure your code follows these conventions.
 
+## Prefer arrow functions; with implicit return if possible
+
+```js
+// Good
+const add = (a, b) => a + b
+
+// Bad
+function add(a, b) {
+    return a + b
+}
+```
+
 ## For React, prefer React Hooks like:
 
 ```js
