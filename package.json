@@ -11,6 +11,7 @@
         "format": "pretty-quick"
     },
     "dependencies": {
+        "@sigma/node-piechart": "^3.0.0",
         "@types/d3": "^7.4.3",
         "d3": "^7.9.0",
         "graphology": "^0.26.0",
