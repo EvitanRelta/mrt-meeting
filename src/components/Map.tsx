@@ -28,8 +28,6 @@ export const Map = () => {
                 return {
                     ...data,
                     highlighted: isSelected,
-                    // Increase size if selected
-                    size: isSelected ? data.size * 1.5 : data.size,
                 }
             },
         })
