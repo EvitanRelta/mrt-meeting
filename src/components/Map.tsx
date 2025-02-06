@@ -6,13 +6,12 @@ import { DEFAULT_NODE_PROGRAM_CLASSES } from 'sigma/settings'
 import type { MrtStationData } from '../data/types'
 import { rawStationDataAtom, selectedStationsAtom, stationGraphAtom } from './store'
 
-const getStationsInLine = (linePrefix: string, stationData: MrtStationData): Set<string> => {
-    return new Set(
+const getStationsInLine = (linePrefix: string, stationData: MrtStationData): Set<string> =>
+    new Set(
         Object.keys(stationData).filter((code) =>
             code.split('/').some((part) => part.startsWith(linePrefix))
         )
     )
-}
 
 export const Map = () => {
     const [graph] = useAtom(stationGraphAtom)
@@ -38,9 +37,8 @@ export const Map = () => {
             const slices: CreateNodePiechartProgramOptions['slices'] = [
                 { color: { attribute: 'color' }, value: { value: 1 } },
             ]
-            for (let j = 1; j < i; j++) {
+            for (let j = 1; j < i; j++)
                 slices.push({ color: { attribute: `color-${j}` }, value: { value: 1 } })
-            }
             nodeProgramClasses[`pie-${i}`] = createNodePiechartProgram({ slices })
         }
 
@@ -65,9 +63,7 @@ export const Map = () => {
                 } else {
                     res.type = `pie-${colors.length}`
                     res.color = colors[0]
-                    for (let i = 1; i < colors.length; i++) {
-                        res[`color-${i}`] = colors[i]
-                    }
+                    for (let i = 1; i < colors.length; i++) res[`color-${i}`] = colors[i]
                 }
 
                 if (
@@ -76,24 +72,21 @@ export const Map = () => {
                     hoverState.hoveredNode !== node
                 ) {
                     res.color = '#f6f6f6'
-                    if (colors.length > 1) {
-                        for (let i = 1; i < colors.length; i++) {
-                            res[`color-${i}`] = '#f6f6f6'
-                        }
-                    }
+                    if (colors.length > 1)
+                        for (let i = 1; i < colors.length; i++) res[`color-${i}`] = '#f6f6f6'
                 }
 
                 return res
             },
         })
 
-        sigmaRef.current.on('clickNode', (event: { node: string }) => {
+        sigmaRef.current.on('clickNode', (event: { node: string }) =>
             setSelectedStations((prev) => {
                 const next = new Set(prev)
                 next.has(event.node) ? next.delete(event.node) : next.add(event.node)
                 return next
             })
-        })
+        )
 
         sigmaRef.current.on('enterNode', (event: { node: string }) => {
             if (hoverTimeoutRef.current !== null) window.clearTimeout(hoverTimeoutRef.current)
@@ -160,9 +153,7 @@ export const Map = () => {
             } else {
                 res.type = `pie-${colors.length}`
                 res.color = colors[0]
-                for (let i = 1; i < colors.length; i++) {
-                    res[`color-${i}`] = colors[i]
-                }
+                for (let i = 1; i < colors.length; i++) res[`color-${i}`] = colors[i]
             }
 
             if (
@@ -171,11 +162,8 @@ export const Map = () => {
                 hoverState.hoveredNode !== node
             ) {
                 res.color = '#f6f6f6'
-                if (colors.length > 1) {
-                    for (let i = 1; i < colors.length; i++) {
-                        res[`color-${i}`] = '#f6f6f6'
-                    }
-                }
+                if (colors.length > 1)
+                    for (let i = 1; i < colors.length; i++) res[`color-${i}`] = '#f6f6f6'
             }
             return res
         })
@@ -187,9 +175,8 @@ export const Map = () => {
                 if (
                     !hoverState.hoveredLineStations.has(source) ||
                     !hoverState.hoveredLineStations.has(target)
-                ) {
+                )
                     res.color = '#f6f6f6'
-                }
             }
             return res
         })
